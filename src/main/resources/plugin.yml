@@ -1,0 +1,5 @@
+name: OnlyzDuels
+version: 1.0
+description: Custom plugin for Onlyz
+author: Yerti
+main: com.yerti.onlyzduels.OnlyzDuels
