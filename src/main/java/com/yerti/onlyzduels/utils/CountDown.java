@@ -13,7 +13,7 @@ public class CountDown extends BukkitRunnable {
     Duel duel;
 
     public CountDown(Duel duel) {
-        this.delay = 5;
+        this.delay = 3;
         this.duel = duel;
     }
 
@@ -32,6 +32,10 @@ public class CountDown extends BukkitRunnable {
             this.delay--;
         } else {
             this.cancel();
+            Variables.printPrefixMessage("Go!", duel.getPlayerOne());
+            Variables.printPrefixMessage("Go!", duel.getPlayerTwo());
+            duel.getPlayerOne().playSound(duel.getPlayerTwo().getLocation(), Sound.LEVEL_UP, 1, 1);
+            duel.getPlayerOne().playSound(duel.getPlayerTwo().getLocation(), Sound.LEVEL_UP, 1, 1);
             duel.setStatus(EnumDuelStatus.PROGRESS);
         }
     }

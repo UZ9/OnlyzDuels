@@ -7,6 +7,7 @@ import com.yerti.onlyzduels.arena.EnumDuelStatus;
 import com.yerti.onlyzduels.utils.Variables;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,9 +22,11 @@ import org.bukkit.potion.PotionEffect;
 public class OnPlayerKill implements Listener {
 
     Plugin pl;
+    World mainWorld;
 
     public OnPlayerKill(Plugin pl) {
         this.pl = pl;
+        mainWorld = Bukkit.getWorld("world");
     }
 
     @EventHandler
@@ -51,7 +54,8 @@ public class OnPlayerKill implements Listener {
                Variables.printPrefixMessage(event.getEntity().getKiller().getDisplayName() + " has won the duel.", event.getEntity());
                Variables.printPrefixMessage(event.getEntity().getKiller().getDisplayName() + " has won the duel.", event.getEntity().getKiller());
 
-
+               event.getEntity().getInventory().clear();
+               event.getEntity().getInventory().setArmorContents(null);
                event.getEntity().getKiller().getInventory().clear();
                event.getEntity().getKiller().getInventory().setArmorContents(null);
 
@@ -62,7 +66,8 @@ public class OnPlayerKill implements Listener {
                event.getEntity().getKiller().setGameMode(GameMode.ADVENTURE);
                event.getEntity().setGameMode(GameMode.ADVENTURE);
 
-               Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "warp spawn " + event.getEntity().getKiller().getName());
+               event.getEntity().getKiller().teleport(mainWorld.getSpawnLocation());
+               event.getEntity().getKiller().setHealth(20);
 
 
            }
@@ -79,12 +84,18 @@ public class OnPlayerKill implements Listener {
 
         for (Duel duel : Variables.duels) {
             if (duel.getPlayerOne().equals(event.getPlayer())) {
-                duel.getPlayerTwo().performCommand("spawn");
+                if (duel.getStatus() == EnumDuelStatus.REQUEST || duel.getStatus() == EnumDuelStatus.WAITING) {
+                    return;
+                }
+                duel.getPlayerTwo().teleport(mainWorld.getSpawnLocation());
                 Variables.printPrefixMessage("The other player has left the game!", duel.getPlayerTwo());
                 Variables.duels.remove(duel);
                 return;
             } else if (duel.getPlayerTwo().equals(event.getPlayer())) {
-                duel.getPlayerOne().performCommand("spawn");
+                if (duel.getStatus() == EnumDuelStatus.REQUEST || duel.getStatus() == EnumDuelStatus.WAITING) {
+                    return;
+                }
+                duel.getPlayerTwo().teleport(mainWorld.getSpawnLocation());
                 Variables.printPrefixMessage("The other player has left the game!", duel.getPlayerOne());
                 Variables.duels.remove(duel);
                 return;
@@ -118,7 +129,8 @@ public class OnPlayerKill implements Listener {
         for (Duel duel : Variables.duels) {
             if (duel.getStatus() == EnumDuelStatus.COUNTDOWN) {
                 if (duel.getPlayerOne().equals(event.getPlayer()) || duel.getPlayerTwo().equals(event.getPlayer())) {
-                    event.setCancelled(true);
+                    if (!event.getFrom().toVector().equals(event.getTo().toVector()))
+                        event.setCancelled(true);
                 }
             }
 
